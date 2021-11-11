@@ -1,0 +1,182 @@
+{
+    "User": {
+        "_id": "123abx",
+        "firstName": "John",
+        "lastName": "Doe",
+        "email": "john@doe.com",
+        "phone": "12345678",
+        "profileImage": "http://asd.dk",
+        "deviceToken": "12345678",
+        "address": {
+            "address": "Søstrupvej 70",
+            "zip": "4420"
+        },
+        "projects": [],
+        "createdAt": "12.12.2052",
+        "updatedAt": "12.12.2052"
+    },
+
+    "Project": {
+        "_id": "321abc",
+        "consumerId": "1232avx",
+        "title": "Project",
+        "description": "description",
+        "projectType": ["VVS"],
+        "projectImages": ["url", "url"],
+        "deadline": "",
+        "address": {
+            "address": "Søstrupvej 70",
+            "zip": "4420"
+        },
+        "location": {
+            "type": "point",
+            "coordinates": [43.234, -43.234]
+        },
+        "outreaches": [{
+            "outreachId": "321abc",
+            "companyName": "Brians tømrerbix",
+            "companyLogo": "http://asd.dk",
+            "verkerName": "brian",
+            "verkerProfileImage": "http://asd.dk",
+            "initialMessage": "Hej mit navn er brian"   
+        }],
+        "createdAt": "12.12.2052",
+        "updatedAt": "12.12.2052"
+    },
+
+
+    "outreach": {
+        "_id": "321abc",
+        "projectId":"abc123",
+        "initialMessage": "Hej mit navn er brian",
+        "images": [""],
+        "company": {
+            "companyId": "abc123",
+            "companyName": "Brians tømrerbix",
+            "companyLogo": "http://asd.dk",
+            "established": "12.12.2052",
+            "verkerSince": "12.12.2052",
+            "reviews": {
+                "totalReview": 200,
+                "avrage": 5
+            }
+        },
+        "offers": [{
+            "Title": "Tilbud på ny loft",
+            "description": "Følgende tilbud er sejt...",
+            "projectStart": "12.12.2052",
+            "projectEnd": "12.12.2052",
+            "materialPrice": 12564,
+            "salery": 49312,
+            "status": "acceptet"
+        }],
+        "leadVerker": {
+            "verkerId": "abc123",
+            "firstName": "John",
+            "profileImage": "http://asd.dk"
+        },
+        "consumer": {
+            "userId": "123",
+            "firstName": "John",
+            "profileImage": "123"            
+        },
+        "totalMessages": 200,
+        "members": [{"userId": "abc123", "totalUnread": 24 }]
+    },
+
+
+    "messages": {
+        "_id": "123",
+        "outreachId": "123",
+        "message": "Hej med dig",
+        "projectId": "123",
+        "files": [],
+        "user": {
+            "userId": "123",
+            "firstName": "John",
+            "profileImage": "abc/Asd"
+        },
+        "createdAt": "date"
+    },
+
+    "assignedProject": {
+        "_id": "123",
+        "outreachId": "123",
+        "projectId": "abc123",
+        "status": "active",
+        "offer": {
+            "_id": "321abc",
+            "Title": "Tilbud på ny loft",
+            "description": "Følgende tilbud er sejt...",
+            "projectStart": "12.12.2052",
+            "projectEnd": "12.12.2052",
+            "materialPrice": 12564,
+            "arbejdsLøn": 49312,
+            "status": "acceptet",
+            "createdAt": "12.12.2052"
+        },
+
+        "oldOffers": [{}],
+        "documentation": [{
+            "images": ["url"],
+            "description": "",
+            "date": "asd"
+        }]
+
+    },
+
+
+
+    "Company": {
+        "_id": "abc123",
+        "name": "Brians Tømrerbix",
+        "description": "We are drinking beer, while nailing",
+        "cvr": "12345678",
+        "email": "abc@abc.com",
+        "phone": "12345678",
+        "employees": 3,
+        "established": 2012,
+        "totalProjects": 10,
+        "createdAt": "timeDate",
+        "owner": {
+            "_id": "abc123",
+            "FirstName": "John",
+            "lastName": "Doe",
+            "profileImage": "http://asd.dk"
+        },
+        "employeeProfiles": [{
+            "profileImage": "http://asd.dk",
+            "firstName": "John",
+            "title": "Svend"
+        }],
+        "avrageRating": {
+            "totalRating": 200,
+            "communication": 5,
+            "avrageMedian": 5,
+            "pricePrecision": 5,
+            "deadline": 5,
+            "quality": 5
+        },
+        "last10rating": [{
+            "userId": "abc123",
+            "projectId": "abc123",
+            "firstName": "John",
+            "createdAt": "dateTime",
+            "textReview": "Lorem Ipsum",
+            "communication": 5,
+            "pricePrecision": 5,
+            "deadline": 5,
+            "quality": 5
+        }],
+        "cases": [{
+            "title": "Dipshot",
+            "description": "descript",
+            "images": []
+        }],
+        "certificates": [{
+            "title": "Autroriseret",
+            "subText": "2012 93 19",
+            "icon": "/file.png"
+        }]
+    }
+}

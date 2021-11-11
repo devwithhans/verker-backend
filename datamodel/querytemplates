@@ -1,0 +1,5 @@
+mutation {
+  createUser(userInput: {phone: "42231252", firstName: "Hans", lastName: "Pedersen", deviceToken: "abc123", address: {address: "Søstrupvej 70", zip: "4420 Regstrup"}, email: "hc@fbpe.dk", password: "test123"}) {
+    firstName
+  }
+}
