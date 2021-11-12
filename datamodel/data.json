@@ -125,6 +125,24 @@
 
     },
 
+    "Verker": {
+        "_id": "321abc",
+        "firstName": "John",
+        "lastName": "Doe",
+        "email": "john@doe.com",
+        "password": "asdasdsad123",
+        "phone": "12345678",
+        "profileImage": "http://asd.dk",
+        "deviceToken": "12345678",
+        "address": {
+            "address": "Søstrupvej 70",
+            "zip": "4420"
+        },
+        "companyId": "12345678",
+        "createdAt": "12.12.2052",
+        "updatedAt": "12.12.2052"
+    },
+
 
 
     "Company": {
@@ -138,6 +156,11 @@
         "established": 2012,
         "totalProjects": 10,
         "createdAt": "timeDate",
+        "outreaches": ["asdssf"],
+        "address": {
+            "address": "Søstrupvej 70",
+            "zip": "4420"
+        },
         "owner": {
             "_id": "abc123",
             "FirstName": "John",
@@ -175,7 +198,7 @@
         }],
         "certificates": [{
             "title": "Autroriseret",
-            "subText": "2012 93 19",
+            "description": "2012 93 19",
             "icon": "/file.png"
         }]
     }

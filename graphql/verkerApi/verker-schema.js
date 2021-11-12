@@ -22,37 +22,46 @@ module.exports = buildSchema(`
         coordinates: [Float!]!
     }
 
-    input ProjectInputData {
-        title: String!
+    type Owner {
+        ownerId: ID!
+        firstName: String!
+        lastName: String!
+        profileImage: String!
+    }
+
+    input CompanyInputData {
+        name: String!
         description: String!
-        projectType: [String!]!
-        deadline: String!
+        cvr: String!
+        email: String!
+        phone: String!
+        employees: Int!
+        established: String!
         address: InputAddress!
-        location: InputLocation!
     }
 
-    type Project {
+    type Company {
         _id: ID!
-        title: String!
+        name: String!
         description: String!
-        projectType: [String!]!
-        deadline: String!
+        cvr: String!
+        owner: Owner!
+        email: String!
+        phone: String!
+        employees: Int!
+        established: String!
         address: Address!
-        location: Location!
-
-        createdAt: String!
-        updatedAt: String!
     }
 
-    type User {
+    type Verker {
         _id: ID!
         firstName: String!
         lastName: String!
         profileImage: String!
         deviceToken: String!
         address: Address!
-        projects: [Project]
         email: String!
+        phone: String!
         password: String
     }
 
@@ -61,7 +70,7 @@ module.exports = buildSchema(`
         jwt: String!
     }
 
-    input UserInputData {
+    input VerkerInputData {
         firstName: String!
         lastName: String!
         profileImage: String
@@ -73,13 +82,14 @@ module.exports = buildSchema(`
     }
 
     type RootQuery {
-        singleUser(id: String!) : User!
-        signinUser(email: String!, password: String!) : AuthResult!
+        singleVerker(id: String!) : Verker!
+        signinVerker(email: String!, password: String!) : AuthResult!
     }
 
     type RootMutation {
-        createUser(userInput: UserInputData): User!
-        createProject(projectInput: ProjectInputData): Project!
+        inviteVerker(email: String!) : String!
+        createCompany(companyInput: CompanyInputData): Company!
+        createVerker(verkerInput: VerkerInputData): Verker!
     }
     
 

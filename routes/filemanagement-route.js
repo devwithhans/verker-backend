@@ -74,8 +74,6 @@ var uploadProfileImages = () => {
     });
 }
 
-
-
 router.use("/", (req, res, next) => {
     if(!req.isUser){
         const error = new Error("Need to be user for uploading files");

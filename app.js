@@ -10,8 +10,11 @@ const {
 
 
 
-const graphqlSchema = require('./graphql/schema');
-const graphqlResolver = require('./graphql/resolvers');
+const userGraphqlSchema = require('./graphql/userApi/user-schema');
+const userGraphqlResolver = require('./graphql/userApi/user-resolvers');
+const verkerGraphqlSchema = require('./graphql/verkerApi/verker-schema');
+const verkerGraphqlResolver = require('./graphql/verkerApi/verker-resolvers');
+
 const auth = require('./middleware/auth');
 const filemanagement = require('./routes/filemanagement-route');
 const { AppSync } = require('aws-sdk');
@@ -38,9 +41,6 @@ app.post((res, req, next) => {
 
 
 
-
-
-
 app.use("/", auth);
 
 
@@ -48,10 +48,15 @@ app.use("/file", filemanagement);
 
 
 
-//These are the routes to all the business logic
-app.use('/graphql', graphqlHTTP({
-    schema: graphqlSchema,
-    rootValue: graphqlResolver,
+app.use('/graphql/user', graphqlHTTP({
+    schema: userGraphqlSchema,
+    rootValue: userGraphqlResolver,
+    graphiql: true
+}));
+
+app.use('/graphql/verker', graphqlHTTP({
+    schema: verkerGraphqlSchema,
+    rootValue: verkerGraphqlResolver,
     graphiql: true
 }));
 

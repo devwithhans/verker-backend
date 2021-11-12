@@ -39,7 +39,7 @@ module.exports = function auth(req, res, next) {
         req.isAdmin = true;
     }
 
-    console.log(decodedToken.userId, req.isUser);
+    console.log(decodedToken.userId, req.isVerker);
 
     // If the token is valid, are storing the userId in the request, and parsing on to the next middleware
     req.userId = decodedToken.userId;

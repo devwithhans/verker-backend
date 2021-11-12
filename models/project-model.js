@@ -3,6 +3,10 @@ const Schema = mongoose.Schema;
 
 
 const projectSchema = new Schema({
+    consumerId: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+    },
     title: {
         type: String,
         required: true,
@@ -39,7 +43,7 @@ const projectSchema = new Schema({
             required: true
         },
         coordinates: {
-            type: String,
+            type: Array,
             required: true
         },
     },

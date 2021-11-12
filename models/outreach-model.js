@@ -109,7 +109,7 @@ const outreachSchema = new Schema({
     members: [{
         userId: {
             type: Schema.Types.ObjectId,
-            ref: "Users",
+            ref: "User",
             required: true
         },
         totalUnread: {type: Number, required: true}
@@ -126,4 +126,4 @@ const outreachSchema = new Schema({
 
 
 
-module.exports = mongoose.model('Projects', projectSchema);
+module.exports = mongoose.model('Outreach', outreachSchema);
