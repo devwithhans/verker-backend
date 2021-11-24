@@ -10,6 +10,7 @@
   "author": "Hans-Christian Bøge Pedersen",
   "license": "ISC",
   "dependencies": {
+    "apollo-server-express": "^3.5.0",
     "aws-sdk": "^2.1025.0",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
@@ -21,7 +22,9 @@
     "mongoose": "^6.0.10",
     "multer": "^1.4.3",
     "multer-s3-transform": "^2.3.2",
-    "sharp": "^0.29.2"
+    "request": "^2.81.0",
+    "sharp": "^0.29.2",
+    "socket.io": "^4.4.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.13"

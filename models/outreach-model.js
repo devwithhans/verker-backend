@@ -12,104 +12,45 @@ const outreachSchema = new Schema({
         type: String,
         required: true,
     },
-    images: {
-        type: Array,
-        required: true,
-    },
     company: {
-        companyId: {
+        _id: {
             type: Schema.Types.ObjectId,
             ref: "Companies",
             required: true,
         },
-        companyName: {
+        name: {
             type: String,
             required: true,
         },
-        companyLogo: {
+        logo: {
             type: String,
             required: true,
         },
         established: {
-            type: Date,
+            type: Number,
             required: true,
         },
         verkerSince: {
             type: Date,
             required: true,
         },
-        reviews: {
-            totalReviews: {
-                type: Number,
-                required: true,
-            },
-            avrage: {
-                type: Number,
-                required: true
-            },
-        }
     },
-    offers: [{
-        title: {
-            type: String,
-        },
-        description: {
-            type: String,
-        },
-        projectStart: {
-            type: Date,
-        },
-        projectEnd: {
-            type: Date,
-        },
-        materialPrice: {
-            type: Number,
-        },
-        salery: {
-            type: Number,
-        },
-        status: {
-            type: String,
-        },
-    }],
-    leadVerker: {
-        verkerId: {
-            type: Schema.Types.ObjectId,
-            ref: "Verker",
-            required: true,
-        },
-        firstName: {
-            type: String,
-            required: true,
-        },
-        profileImage: {
-            type: String,
-            required: true,
-        },
-    },
-    consumer: {
-        userId: {
-            type: Schema.Types.ObjectId,
-            ref: "Users",
-            required: true
-        },
-        firstName: {
-            type: String,
-            required: true
-        },
-        profileImage: {
-            type: String,
-            required: true
-        }
-    },
-    totalMessage: {
+    totalMessages: {
         type: Number,
         required: true
     },
     members: [{
         userId: {
             type: Schema.Types.ObjectId,
-            ref: "User",
+            required: true
+        },
+        role: {type: String, required: true},
+        firstName: {
+            type: String,
+            required: true
+        },
+        profileImage: {
+            type: String,
             required: true
         },
         totalUnread: {type: Number, required: true}

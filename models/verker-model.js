@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 
 
 const verkerSchema = new Schema({
-    firstName:  {
+    firstName: {
         type: String,
     },
     lastName: {
@@ -24,25 +24,24 @@ const verkerSchema = new Schema({
     },
     deviceToken: {
         type: String,
-        
+
     },
     address: {
-        address: {type: String},
-        zip: {type: String}
+        address: {
+            type: String
+        },
+        zip: {
+            type: String
+        }
     },
     companyId: {
         type: Schema.Types.ObjectId,
         ref: "Company",
     },
-    companyInvite: {
-        companyName: {type: String},
-        companyId: {
-        type: Schema.Types.ObjectId,
-        ref: "Company",
-        }
-},
-    
-  }, {timestamps: true});
+
+}, {
+    timestamps: true
+});
 
 
 

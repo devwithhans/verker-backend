@@ -15,10 +15,10 @@ const projectSchema = new Schema({
         type: String,
         required: true,
     },
-    projectType: [{
+    projectType: {
         type: String,
         required: true,
-    }],
+    },
     projectImages: [{
         type: String,
         required: true,
@@ -48,34 +48,16 @@ const projectSchema = new Schema({
         },
     },
     outreaches: [{
-        outreachId: {
             type: Schema.Types.ObjectId,
             ref: "Outreaches",
-        },
-        companyName: {
-            type: String,
-        },
-        companyLogo: {
-            type: String,
-        },
-        verkerName: {
-            type: String,
-        },
-        verkerProfileImage: {
-            type: String,
-        },
-        initialMessage: {
-            type: String,
-        },
-
-
-    }]
-
-
+        }
+    ]
 }, {
     timestamps: true
 });
 
+
+projectSchema.index({ location: '2dsphere' });
 
 
 

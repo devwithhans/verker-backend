@@ -1,14 +1,14 @@
 require('dotenv').config();
 
 const express = require('express');
-const path = require('path');
+const { ApolloServer } = require('apollo-server-express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const {
     graphqlHTTP
 } = require('express-graphql');
 
-
+const errorHandler = require('./graphql/error-handler');
 
 const userGraphqlSchema = require('./graphql/userApi/user-schema');
 const userGraphqlResolver = require('./graphql/userApi/user-resolvers');
@@ -17,17 +17,15 @@ const verkerGraphqlResolver = require('./graphql/verkerApi/verker-resolvers');
 
 const auth = require('./middleware/auth');
 const filemanagement = require('./routes/filemanagement-route');
-const { AppSync } = require('aws-sdk');
 
 const mdbUser = process.env.MONGODB_USER_NAME;
 const mdbPw = process.env.MONGODB_PASSWORD;
 
-
-
 const app = express();
 
+const server = new ApolloServer({verkerGraphqlSchema, verkerGraphqlResolver});
 
-
+server.applyMiddleware({app});
 
 
 // Here we define that the request body is an json object
@@ -57,19 +55,28 @@ app.use('/graphql/user', graphqlHTTP({
 app.use('/graphql/verker', graphqlHTTP({
     schema: verkerGraphqlSchema,
     rootValue: verkerGraphqlResolver,
-    graphiql: true
+    graphiql: true,
+    customFormatErrorFn: (err) => {
+        console.log(err);
+        const error = errorHandler(err.message)
+        return ({
+            message: error.message,
+            extensions: {
+                statusCode: error.statusCode,
+                customCode: error.customCode,
+            }
+        })
+    }
 }));
 
-// This middleware is reached if we got a issue, and is responding with a statuscode and a message
-app.use((error, req, res, next) => {
-    console.log(error);
+app.use((err, req, res, next) => {
     const status = error.statusCode || 500;
     const message = error.message;
-    // const data  = error.data;
 
-    res.status(status).json({
-        message: message,
-        // data: data,
+    res.status(999).json({
+        message: error.message,
+        statusCode: error.statusCode,
+        customCode: error.customCode,
     });
 })
 

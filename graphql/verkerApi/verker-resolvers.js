@@ -4,10 +4,16 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 
+const {
+    errorName
+} = require('../constants')
+
 
 const VerkerModel = require('../../models/verker-model');
 const ProjectModel = require('../../models/project-model');
 const CompanyModel = require('../../models/company-model');
+const OutreachModel = require('../../models/outreach-model');
+const {createProject} = require('../userApi/user-resolvers');
 
 
 const jwtHt = process.env.JWT_TOKEN;
@@ -17,11 +23,12 @@ module.exports = {
         email,
         password
     }) {
+        console.log('hertil');
         const verker = await VerkerModel.findOne({
             email: email
         });
         if (!verker) {
-            const error = new Error('No verker was found');
+            const error = new Error('EMAIL_NOT_FOUND');
             error.statusCode = 404;
             throw error;
         }
@@ -29,7 +36,7 @@ module.exports = {
         const pwMatch = await bcrypt.compare(password, verker.password);
 
         if (!pwMatch) {
-            const error = new Error('password was incorrect');
+            const error = new Error('PASSWORD_IS_INCORRECT');
             error.statusCode = 404;
             throw error;
         }
@@ -52,7 +59,7 @@ module.exports = {
         companyInput
     }, req) {
 
-        if(!req.isVerker){
+        if (!req.isVerker) {
             const error = new Error('Need to be signed in');
             throw error;
         }
@@ -79,6 +86,9 @@ module.exports = {
             throw error;
         }
 
+        const verkerId = verker._id;
+
+
         const newCompany = new CompanyModel({
             name: companyInput.name,
             description: companyInput.description,
@@ -88,14 +98,17 @@ module.exports = {
             employees: companyInput.employees,
             established: companyInput.established,
             totalProjects: companyInput.totalProjects,
-            owner: {
-                ownerId: verker._id,
-                firstName: verker.firstName,
-                lastName: verker.lastName,
-                profileImage: verker.profileImage,
+            roles: {
+                verkerId: "OWNER"
             },
             address: companyInput.address,
+            location: {
+                type: "Point",
+                coordinates: companyInput.coordinates,
+            }
         })
+
+
 
         const company = await newCompany.save();
 
@@ -162,56 +175,288 @@ module.exports = {
         }
 
     },
-    inviteVerker: async function ({email}, req){
-        if(!req.isVerker){
-            const error = new Error('You must be verker');
+    // inviteVerker: async function ({email}, req){
+    //     if(!req.isVerker){
+    //         const error = new Error('You must be verker');
+    //         throw error;
+    //     }
+    //     const currentVerker = await VerkerModel.findById(req.userId);
+
+    //     const company = await CompanyModel.findById(currentVerker.companyId);
+    //     if(!company){
+    //         const error = new Error('I seems that you are are not connected to a company');
+    //         throw error;
+    //     }
+    //     if(company.owner.ownerId !== req.userId){
+    //         const error = new Error('You need to be the owner of the company to invite');
+    //         throw error;  
+    //     }
+    //     console.log(company.employeeInvite);
+    //     if(company.employeeInvite.includes(email)){
+    //         const error = new Error('You allready invited this verker');
+    //         throw error;  
+    //     }
+
+
+    //     const verkerExists = await VerkerModel.findOne({email: email});
+
+    //     if(!verkerExists){
+    //         const newVerker = new VerkerModel({
+    //             email: email,
+    //             companyInvite: {
+    //                 companyName: company.name,
+    //                 companyId: company._id
+    //             }
+    //         });
+    //         await newVerker.save();
+    //         company.employeeInvite.push(email);
+    //         await company.save();
+    //         return "You sent an invitation to email";
+    //     }
+    //         verkerExists.companyInvite = {
+    //             companyName: company.name,
+    //             companyId: company._id
+    //         };
+    //         await verkerExists.save();
+    //         company.employeeInvite.push(email);
+    //         await company.save();
+    //         return "You sent an invitation to email";
+
+
+
+    // },
+    getVerker: async function ({}, req) {
+        if (!req.isVerker) {
+            const error = new Error(errorName.NOT_VERKER);
             throw error;
         }
-        const currentVerker = await VerkerModel.findById(req.userId);
 
-        const company = await CompanyModel.findById(currentVerker.companyId);
-        if(!company){
-            const error = new Error('I seems that you are are not connected to a company');
+        const verker = await VerkerModel.findById(req.userId);
+        let company;
+        let hasCompany = false;
+
+
+        if (!verker) {
+            const error = new Error(errorName.USER_DOES_NOT_EXIST);
             throw error;
         }
-        if(company.owner.ownerId !== req.userId){
-            const error = new Error('You need to be the owner of the company to invite');
-            throw error;  
-        }
-        console.log(company.employeeInvite);
-        if(company.employeeInvite.includes(email)){
-            const error = new Error('You allready invited this verker');
-            throw error;  
-        }
-        
 
-        const verkerExists = await VerkerModel.findOne({email: email});
-
-        if(!verkerExists){
-            const newVerker = new VerkerModel({
-                email: email,
-                companyInvite: {
-                    companyName: company.name,
-                    companyId: company._id
+        if (verker.companyId) {
+            companyResult = await VerkerModel.findById(req.userId).populate('companyId');
+            if (companyResult) {
+                hasCompany = true;
+                company = companyResult.companyId
+                return {
+                    verker: {
+                        ...verker._doc,
+                        _id: verker._id.toString(),
+                    },
+                    hasCompany: hasCompany,
+                    company: {
+                        ...company._doc,
+                        _id: verker._id.toString(),
+                    }
                 }
-            });
-            await newVerker.save();
-            company.employeeInvite.push(email);
-            await company.save();
-            return "You sent an invitation to email";
+            }
         }
-            verkerExists.companyInvite = {
-                companyName: company.name,
-                companyId: company._id
-            };
-            await verkerExists.save();
-            company.employeeInvite.push(email);
-            await company.save();
-            return "You sent an invitation to email";
+
+
+
+        return {
+            verker: {
+                ...verker._doc,
+                _id: verker._id.toString(),
+            },
+            hasCompany: hasCompany,
+        }
+
+    },
+    getProjects: async function ({
+        coordinates,
+        maxDistance,
+        type
+    }, req) {
+
+
+        let query = {
+            location: {
+                $near: {
+                    $geometry: {
+                        type: "Point",
+                        coordinates: coordinates,
+                    },
+                    $maxDistance: maxDistance,
+                },
+            },
+            projectType: type
+        };
+
+
+        // We find the projects for the current user
+        const projects = await ProjectModel.find(query)
+            .lean()
+
+
+
+        if (projects.length === 0) {
+            const error = new Error('NO_PROJECTS');
+            throw error;
+        }
+
+
+        for (var i in projects) {
+            console.log(projects[i])
+            console.log(projects[i]['location']['coordinates'][0], projects[i]['location']['coordinates'][1])
+
+            var distance = await getDistanceFromLatLonInKm(projects[i]['location']['coordinates'][0], projects[i]['location']['coordinates'][1], coordinates[0], coordinates[1])
+            Object.assign(projects[i], {
+                'distance': distance
+            });
+        }
+
+        return projects;
+
+    },
+    createOutreach: async function ({
+        outreachInput
+    }, req) {
+
+        if(!req.isVerker){
+            const error = new Error('NOT_VERKER')
+            throw error;
+        }
+        console.log(outreachInput.projectId);
+
+
+        const project = await ProjectModel.findById(outreachInput.projectId).populate('consumerId');
+
+        const verker = await VerkerModel.findById(req.userId).populate('companyId');
+
+        console.log('FØRSTE')
+
+        for(var i in verker.companyId.outreaches){
+            if(verker.companyId.outreaches[i].projectId.toString() == project._id.toString()){
+                console.log('FUUUUUCK')
+                const error = new Error('ALREADT_OUTREACHED')
+                throw error;
+            }
+        }
         
+        console.log(verker.companyId.roles.get(req.userId))
+
+        if (verker.companyId.roles.get(req.userId) != 'Owner') {
+            const error = new Error('NEED_OWNER_ACCOUNT')
+            throw error;
+        }
+
+        const newOutreach = OutreachModel({
+            company: {
+                _id: verker.companyId._id,
+                name: verker.companyId.name,
+                logo: verker.companyId.logo,
+                established: verker.companyId.established,
+                verkerSince: verker.companyId.createdAt,
+            },
+            projectId: outreachInput.projectId,
+            initialMessage: outreachInput.initialMessage,
+            totalMessages: 1,
+            members: [{
+                    userId: project.consumerId._id,
+                    role: "CONSUMER",
+                    firstName: project.consumerId.firstName,
+                    profileImage: project.consumerId.profileImage,
+                    totalUnread: 1,
+                },
+                {
+                    userId: req.userId,
+                    role: "VERKER",
+                    firstName: verker.firstName,
+                    profileImage: verker.profileImage,
+                    totalUnread: 0
+                }
+            ],
+        });
+
+        const savedOutreach = await newOutreach.save();
+
+        console.log(project.address);
+
+
+        const pushOutreachesToProject = {
+            "$push": {
+                outreaches: savedOutreach._id,
+            }
+        };
+
+        const pushOutreachesToCompany = {
+            "$push": {
+                outreaches: {
+                    outreachId: savedOutreach._id,
+                    projectId: project._id,
+                }
+            }
+        };
+
+        await project.updateOne(pushOutreachesToProject);
+
+        await CompanyModel.findOneAndUpdate({
+            _id: verker.companyId._id
+        }, pushOutreachesToCompany)
+
+        if (!savedOutreach) {
+            const error = new Error('UNABLE_TO_SAVE_OUTREACH');
+            throw error;
+        }
+
+
+        return savedOutreach;
+
 
 
     }
 
 
+
+}
+
+// async function getDriveDistance(lat1, lon1, lat2, lon2) {
+//     //GET https://routing.openstreetmap.de/routed-car/route/v1/driving/11.652186,55.665043;11.6581663,55.6939533?overview=false&geometries=polyline
+
+//     const apiUrl = `https://routing.openstreetmap.de/routed-car/route/v1/driving/${lon1},${lat1};${lon2},${lat2}?overview=false&geometries=polyline`;
+//     let result;
+
+//     https.get(apiUrl, function (res) {
+//         res.on('data', function (d) {
+//             result = {
+//                             distance: JSON.parse(d).routes[0].distance,
+//                             time: JSON.parse(d).routes[0].duration
+//                         }
+//                         console.log(result);
+//         });
+
+//     }).on('error', function (e) {
+//         console.error(e);
+//     });
+//     return result
+
+// }
+
+
+
+
+function getDistanceFromLatLonInKm(lon1, lat1, lon2, lat2) {
+    var R = 6371; // Radius of the earth in km
+    var dLat = deg2rad(lat2 - lat1); // deg2rad below
+    var dLon = deg2rad(lon2 - lon1);
+    var a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    var d = R * c; // Distance in km
+    return d;
+}
+
+function deg2rad(deg) {
+    return deg * (Math.PI / 180)
 }

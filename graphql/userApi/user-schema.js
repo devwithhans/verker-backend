@@ -24,9 +24,8 @@ module.exports = buildSchema(`
 
     input ProjectInputData {
         title: String!
-        
         description: String!
-        projectType: [String!]!
+        projectType: String!
         projectImages: [String!]!
         deadline: String!
         address: InputAddress!
@@ -37,11 +36,11 @@ module.exports = buildSchema(`
         _id: ID!
         title: String!
         description: String!
-        projectType: [String!]!
+        projectType: String!
         deadline: String!
         address: Address!
         location: Location!
-
+        distance: Float!
         createdAt: String!
         updatedAt: String!
     }
