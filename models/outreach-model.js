@@ -8,16 +8,25 @@ const outreachSchema = new Schema({
         ref: "Projects",
         required: true,
     },
+    projectTitle: {
+        type: String,
+        required: true,
+    },
     initialMessage: {
         type: String,
         required: true,
     },
+    companyId: {
+        type: Schema.Types.ObjectId,
+        ref: "Companies",
+        required: true,
+    },
+    consumerId: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+    },
     company: {
-        _id: {
-            type: Schema.Types.ObjectId,
-            ref: "Companies",
-            required: true,
-        },
         name: {
             type: String,
             required: true,

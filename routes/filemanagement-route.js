@@ -1,7 +1,8 @@
 require('dotenv').config();
 
 
-var aws = require('aws-sdk')
+var aws = require('aws-sdk');
+const { compareSync } = require('bcryptjs');
 const express = require('express');
 
 
@@ -25,7 +26,8 @@ var s3 = new aws.S3({
 var router = express.Router()
 
 var uploadProjectFiles = () => {
-    const folderName = "projectFiles/" + Date.now().toString();
+    const folderName = "projectFiles/";
+    console.log(folderName);
     return multer({
         storage: multerS3({
             s3: s3,
@@ -34,10 +36,11 @@ var uploadProjectFiles = () => {
             transforms: [{
                 id: 'original',
                 key: function (req, file, cb) {
+                    // cb(null, folderName+"/"+Date.now().toString()+".jpg")
                     if(file.mimetype.split('/')[0] == "image"){
-                        cb(null, folderName+"/"+Date.now().toString()+".jpg")
+                        cb(null, folderName+ req.userId + Date.now().toString()+"/"+Date.now().toString()+".jpg")
                     } else if(file.mimetype.split('/')[0] == "video"){
-                        cb(null, folderName+"/"+Date.now().toString()+".mp4")
+                        cb(null, folderName+ req.userId + Date.now().toString()+"/"+Date.now().toString()+".mp4")
                     }
                 },
                 transform: function (req, file, cb) {
@@ -79,13 +82,17 @@ router.use("/", (req, res, next) => {
         const error = new Error("Need to be user for uploading files");
         next(error);
     }
-   
+
+    // print(req)   
 
     next();
 })
 
+
+
 router.post('/uploadProjectFiles', uploadProjectFiles().array('files'), (req, res, next) => {
     const paths = [];
+
 
     for(var i in req.files){
         paths.push(req.files[i].transforms[0].key);
@@ -94,6 +101,9 @@ router.post('/uploadProjectFiles', uploadProjectFiles().array('files'), (req, re
     res.status(200).json({
         path: paths,
     })
+
+    console.log(paths);
+
 })
 
 router.post("/profileImage", uploadProfileImages().single('files'), (req, res, next) => {
@@ -104,5 +114,17 @@ router.post("/profileImage", uploadProfileImages().single('files'), (req, res, n
     })
 })
 
+exports.getFileStream = function getFileStream(fileKey){
 
-module.exports = router
+    console.log(fileKey, "   ", bucketName)
+
+    const downloadParams = {
+        Bucket: bucketName, /* required */
+        Key: fileKey, /* required */
+    }
+
+    return s3.getObject(downloadParams).createReadStream();
+
+}
+
+exports.router = router

@@ -9,7 +9,8 @@ exports.errorName = {
   NEED_OWNER_ACCOUNT: 'NEED_OWNER_ACCOUNT',
   UNABLE_TO_SAVE_OUTREACH: 'UNABLE_TO_SAVE_OUTREACH',
   ALREADT_OUTREACHED: 'ALREADT_OUTREACHED',
-  NO_SOCKET_FOUND: 'NO_SOCKET_FOUND'
+  NO_SOCKET_FOUND: 'NO_SOCKET_FOUND',
+  NO_MESSAGES: 'NO_MESSAGES',
 
 
 
@@ -71,5 +72,11 @@ exports.errorType = {
     message: 'No socket was found',
     statusCode: 500,
     customCode: 2104
-  }
+  },
+  NO_MESSAGES: {
+    message: 'No messages was found',
+    statusCode: 500,
+    customCode: 2105
+  },
+
 }

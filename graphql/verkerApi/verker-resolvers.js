@@ -2,18 +2,23 @@ require('dotenv').config();
 
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const https = require('https');
 
 
 const {
     errorName
 } = require('../constants')
 
-
 const VerkerModel = require('../../models/verker-model');
 const ProjectModel = require('../../models/project-model');
 const CompanyModel = require('../../models/company-model');
 const OutreachModel = require('../../models/outreach-model');
-const {createProject} = require('../userApi/user-resolvers');
+const MessageModel = require('../../models/message-model');
+
+const {
+    createProject
+} = require('../userApi/user-resolvers');
+const messageModel = require('../../models/message-model');
 
 
 const jwtHt = process.env.JWT_TOKEN;
@@ -23,7 +28,6 @@ module.exports = {
         email,
         password
     }) {
-        console.log('hertil');
         const verker = await VerkerModel.findOne({
             email: email
         });
@@ -47,7 +51,7 @@ module.exports = {
             role: "verker",
             //The following is the secret key, that can unlock the token cryptation
         }, jwtHt, {
-            expiresIn: '1h'
+            // expiresIn: '1h'
         });
 
         return {
@@ -277,6 +281,10 @@ module.exports = {
         type
     }, req) {
 
+        if (!req.isVerker) {
+            const error = new Error(errorName.NOT_VERKER);
+            throw error;
+        }
 
         let query = {
             location: {
@@ -305,8 +313,7 @@ module.exports = {
 
 
         for (var i in projects) {
-            console.log(projects[i])
-            console.log(projects[i]['location']['coordinates'][0], projects[i]['location']['coordinates'][1])
+
 
             var distance = await getDistanceFromLatLonInKm(projects[i]['location']['coordinates'][0], projects[i]['location']['coordinates'][1], coordinates[0], coordinates[1])
             Object.assign(projects[i], {
@@ -314,35 +321,54 @@ module.exports = {
             });
         }
 
+
         return projects;
+
+    },
+    getProject: async function ({
+        projectId
+    }, req) {
+
+        // if (!req.isVerker) {
+        //     const error = new Error(errorName.NOT_VERKER);
+        //     throw error;
+        // }
+
+        if (projectId.length = !24) {
+            throw new Error('NEED_OWNER_ACCOUNT')
+        }
+
+        const project = await ProjectModel.findById(projectId);
+
+        if (!project) {
+            throw new Error('NO_PROJECTS');
+        }
+
+        return project;
+
 
     },
     createOutreach: async function ({
         outreachInput
     }, req) {
 
-        if(!req.isVerker){
+        if (!req.isVerker) {
             const error = new Error('NOT_VERKER')
             throw error;
         }
-        console.log(outreachInput.projectId);
 
 
         const project = await ProjectModel.findById(outreachInput.projectId).populate('consumerId');
 
         const verker = await VerkerModel.findById(req.userId).populate('companyId');
 
-        console.log('FØRSTE')
-
-        for(var i in verker.companyId.outreaches){
-            if(verker.companyId.outreaches[i].projectId.toString() == project._id.toString()){
-                console.log('FUUUUUCK')
+        for (var i in verker.companyId.outreaches) {
+            if (verker.companyId.outreaches[i].projectId.toString() == project._id.toString()) {
                 const error = new Error('ALREADT_OUTREACHED')
                 throw error;
             }
         }
-        
-        console.log(verker.companyId.roles.get(req.userId))
+
 
         if (verker.companyId.roles.get(req.userId) != 'Owner') {
             const error = new Error('NEED_OWNER_ACCOUNT')
@@ -350,14 +376,16 @@ module.exports = {
         }
 
         const newOutreach = OutreachModel({
+            companyId: verker.companyId._id,
+            consumerId: project.consumerId,
             company: {
-                _id: verker.companyId._id,
                 name: verker.companyId.name,
                 logo: verker.companyId.logo,
                 established: verker.companyId.established,
                 verkerSince: verker.companyId.createdAt,
             },
             projectId: outreachInput.projectId,
+            projectTitle: project.title,
             initialMessage: outreachInput.initialMessage,
             totalMessages: 1,
             members: [{
@@ -379,7 +407,6 @@ module.exports = {
 
         const savedOutreach = await newOutreach.save();
 
-        console.log(project.address);
 
 
         const pushOutreachesToProject = {
@@ -409,11 +436,122 @@ module.exports = {
         }
 
 
+
         return savedOutreach;
 
 
 
+    },
+    getOutreaches: async function ({
+        companyId
+    }, req) {
+        
+          if (!req.isVerker) {
+            const error = new Error(errorName.NOT_VERKER);
+            throw error;
+        }
+
+        const outreaches = await OutreachModel.find({
+            companyId: companyId
+        });
+
+        for (var i in outreaches) {
+            outreaches[i]['messages'] = await MessageModel.find({
+                outreachId: outreaches[i]._id
+            }).sort({
+                createdAt: -1
+            }).limit(10);
+        }
+
+        return outreaches
+
+    },
+    sendMessage: async function ({
+        messageInput
+    }, req) {
+
+
+        io = require('../../socket').getIO();
+
+        const message = new MessageModel({
+            outreachId: messageInput.outreachId,
+            message: messageInput.message,
+            senderId: req.userId,
+        });
+        const savedMessage = await message.save();
+
+        
+        
+        await OutreachModel.findOneAndUpdate({
+                _id: messageInput.outreachId
+            }, {
+                $inc: {
+                    "members.$[members].totalUnread": 1
+                }
+            }, {
+                arrayFilters: [{
+                    "members.userId": {
+                        $ne: req.userId
+                    }
+                }],
+                multi: true
+            }
+
+        )
+
+
+         io.to(messageInput.socketNotification).emit('message', {
+            type: 'newMessage',
+            data: {
+            ...savedMessage._doc,
+            senderName: messageInput.senderName,
+
+        }
+        });
+
+
+        return  {
+            ...savedMessage._doc,
+            senderName: messageInput.senderName,
+            createdAt: savedMessage.createdAt.toString(),
+        }
+    },
+    getMessages: async function ({
+        outreachId,
+        page
+    }, req) {
+        if(!page){
+            const page = 0;
+        }
+        const limit = 20;
+        const skip = page * limit;
+
+        const messages = await MessageModel.find({
+            outreachId: outreachId
+        }).limit(limit).skip(skip).sort({
+            createdAt: -1
+        });
+
+        if (!messages) {
+            throw new Error('NO_MESSAGES')
+        }
+
+        io = require('../../socket').getIO();
+
+        await OutreachModel.findOneAndUpdate({
+            _id: outreachId,
+            "members.userId": req.userId
+        }, {
+            $set: {
+                'members.$.totalUnread': 0
+            }
+        });
+
+        return messages
+
     }
+
+
 
 
 

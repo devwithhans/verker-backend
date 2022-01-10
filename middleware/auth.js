@@ -10,7 +10,6 @@ module.exports = function auth(req, res, next) {
 
     const authHeader = req.get('Authorization');
     if(!authHeader){
-        console.log('FUCKING SVIN1')
         const error = new Error('NO_JWT');
         return next();
     }
@@ -18,6 +17,8 @@ module.exports = function auth(req, res, next) {
     const token = req.get('Authorization').split(' ')[1];
     let decodedToken;
 
+
+   
 
     // Now we can validate the token by using the jwt function verify. This returns an decodedToken if the server reconises it
     try {
