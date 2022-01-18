@@ -12,6 +12,8 @@ const errorHandler = require('./graphql/error-handler');
 
 const userGraphqlSchema = require('./graphql/userApi/user-schema');
 const userGraphqlResolver = require('./graphql/userApi/user-resolvers');
+const resolver = require('./graphql/api/resolver');
+const schema = require('./graphql/api/schema');
 const verkerGraphqlSchema = require('./graphql/verkerApi/verker-schema');
 const verkerGraphqlResolver = require('./graphql/verkerApi/verker-resolvers');
 
@@ -58,6 +60,23 @@ app.get("/images/:key(*)", (req, res, next) => {
     console.log('WE GET THIS NOW')
 
 });
+
+app.use('/graphql', graphqlHTTP({
+    schema: schema,
+    rootValue: resolver,
+    graphiql: true,
+    customFormatErrorFn: (err) => {
+        console.log(err);
+        const error = errorHandler(err.message)
+        return ({
+            message: error,
+            extensions: {
+                statusCode: err.statusCode,
+                customCode: err.customCode,
+            }
+        })
+    }
+}));
 
 
 app.use('/graphql/user', graphqlHTTP({

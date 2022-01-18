@@ -464,7 +464,7 @@ module.exports = {
             name: project.title, 
             image: verker.profileImage, 
             companyId: verker.companyId._id,
-        });
+        }); 
 
 
         return savedOutreach;
