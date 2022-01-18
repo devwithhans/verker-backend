@@ -55,6 +55,7 @@ module.exports = buildSchema(`
         deviceToken: String!
         address: Address!
         projects: [Project]
+        streamToken: ID!
         email: String!
         phone: String!
         password: String
@@ -62,6 +63,7 @@ module.exports = buildSchema(`
 
     type AuthResult {
         _id: ID!
+        user: User!
         jwt: String!
     }
 

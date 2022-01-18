@@ -68,10 +68,10 @@ app.use('/graphql/user', graphqlHTTP({
         console.log(err);
         const error = errorHandler(err.message)
         return ({
-            message: error.message ,
+            message: error,
             extensions: {
-                statusCode: error.statusCode,
-                customCode: error.customCode,
+                statusCode: err.statusCode,
+                customCode: err.customCode,
             }
         })
     }
@@ -96,7 +96,7 @@ app.use('/graphql/verker', graphqlHTTP({
 
 
 app.use((err, req, res, next) => {
-    console.log(error.message);
+
     const status = error.statusCode || 500;
     const message = error.message;
 

@@ -9,6 +9,15 @@ const {
     errorName
 } = require('../constants')
 
+
+const { connect } = require('getstream')
+
+const api_key = 'cm6ynpu8m6f9' 
+const api_secret = 'twqjvajkmwvdd24epsd9f2z2zgtwb7zhc2mg7cxa9ab4kkn72tpeun3bewvzj42h' 
+
+const client = connect(api_key, api_secret);
+
+
 const VerkerModel = require('../../models/verker-model');
 const ProjectModel = require('../../models/project-model');
 const CompanyModel = require('../../models/company-model');
@@ -54,9 +63,16 @@ module.exports = {
             // expiresIn: '1h'
         });
 
+        const userToken = client.createUserToken(verker._id.toString());
+
+
         return {
             _id: verker._id.toString(),
             jwt: jsonWebToken,
+            verker: {
+                ...verker._doc,
+                streamToken: userToken
+            }
         }
     },
     createCompany: async function ({
@@ -264,12 +280,15 @@ module.exports = {
             }
         }
 
+        const userToken = client.createUserToken(user._id.toString());
 
 
         return {
             verker: {
                 ...verker._doc,
                 _id: verker._id.toString(),
+                streamToken: userToken
+
             },
             hasCompany: hasCompany,
         }
@@ -435,6 +454,17 @@ module.exports = {
             throw error;
         }
 
+
+        const channel = client.channel('messaging', savedOutreach._id, { 
+            created_by_id: req.userId,  
+        }) 
+        await channel.create(); 
+        // create the channel and set created_by to user id 4645 
+        const update = await channel.update({ 
+            name: project.title, 
+            image: verker.profileImage, 
+            companyId: verker.companyId._id,
+        });
 
 
         return savedOutreach;

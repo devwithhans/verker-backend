@@ -34,6 +34,12 @@ const userSchema = new Schema({
         address: {type: String, required: true},
         zip: {type: String, required: true}
     },
+     companyId: {
+        type: Schema.Types.ObjectId,
+        ref: "Company",
+        default: null
+
+    },
     projects: [
         {
           type: Schema.Types.ObjectId,

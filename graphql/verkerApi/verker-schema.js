@@ -102,6 +102,7 @@ module.exports = buildSchema(`
         address: Address!
         email: String!
         phone: String!
+        streamToken: ID!
         password: String
         companyId: String
     }
@@ -115,6 +116,8 @@ module.exports = buildSchema(`
     type AuthResult {
         _id: ID!
         jwt: String!
+        verker: Verker!
+
     }
 
     input VerkerInputData {

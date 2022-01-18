@@ -3,7 +3,12 @@ require('dotenv').config();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
+const { connect } = require('getstream')
 
+const api_key = 'cm6ynpu8m6f9' 
+const api_secret = 'twqjvajkmwvdd24epsd9f2z2zgtwb7zhc2mg7cxa9ab4kkn72tpeun3bewvzj42h' 
+
+const client = connect(api_key, api_secret);
 
 const UserModel = require('../../models/user-model');
 const ProjectModel = require('../../models/project-model');
@@ -64,10 +69,14 @@ module.exports = {
             throw error;
         }
 
+        const userToken = client.createUserToken(user._id.toString());
+        
+        console.log(userToken);
 
         return {
             ...user._doc,
             _id: user._id.toString(),
+            streamToken: userToken
         }
 
     },
@@ -85,6 +94,9 @@ module.exports = {
             error.statusCode = 404;
             throw error;
         }
+
+
+
         return {
             ...user._doc,
             _id: user._id.toString()
@@ -117,12 +129,18 @@ module.exports = {
             role: "user",
             //The following is the secret key, that can unlock the token cryptation
         }, jwtHt, {
-            expiresIn: '1h'
+            // expiresIn: '1h'
         });
+
+        const userToken = client.createUserToken(user._id.toString());
 
         return {
             _id: user._id.toString(),
-            jwt: jsonWebToken
+            jwt: jsonWebToken,
+            user: {
+                ...user._doc,
+                streamToken: userToken
+            },
         }
 
 
