@@ -3,12 +3,15 @@ require('dotenv').config();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-const { connect } = require('getstream')
+const StreamChat = require('stream-chat').StreamChat; 
 
 const api_key = 'cm6ynpu8m6f9' 
 const api_secret = 'twqjvajkmwvdd24epsd9f2z2zgtwb7zhc2mg7cxa9ab4kkn72tpeun3bewvzj42h' 
 
-const client = connect(api_key, api_secret);
+const serverClient = StreamChat.getInstance(api_key,api_secret); 
+
+
+
 
 const UserModel = require('../../models/user-model');
 const ProjectModel = require('../../models/project-model');
@@ -71,7 +74,7 @@ module.exports = {
             throw error;
         }
 
-        const userToken = client.createUserToken(user._id.toString());
+        const userToken = serverClient.createToken(user._id.toString());
         
         console.log(userToken);
 
@@ -89,9 +92,9 @@ module.exports = {
         const user = await UserModel.findOne({
             email: email // Checking if the email exists in the database
         });
-        console.log(user.companyId);
+
         let company;
-        if(user.companyId.length <! 24){
+        if(company && user.companyId.length == 24){
             company = await CompanyModel.findById(user.companyId);
         }
 
@@ -117,7 +120,18 @@ module.exports = {
         }, jwtHt, {
             // expiresIn: '1h'
         }); 
-        const userToken = client.createUserToken(user._id.toString());
+
+        const userToken = serverClient.createToken(user._id.toString());
+
+        console.log(userToken);
+
+        const response = await serverClient.upsertUsers([{  
+            id: user._id.toString(),  
+            role: 'user',  
+            firstName: user.firstName,
+            lastName: user.lastName,
+            
+        }]);
 
         return {
             jwt: jsonWebToken,
@@ -222,52 +236,38 @@ module.exports = {
 
         const user = await UserModel.findById(req.userId).populate('companyId');
 
-        for (var i in verker.companyId.outreaches) {
-            if (verker.companyId.outreaches[i].projectId.toString() == project._id.toString()) {
-                const error = new Error('ALREADT_OUTREACHED')
-                throw error;
-            }
-        }
+        // for (var i in user.companyId.outreaches) {
+        //     if (user.companyId.outreaches[i].projectId.toString() == project._id.toString()) {
+        //         const error = new Error('ALREADT_OUTREACHED')
+        //         throw error;
+        //     }
+        // }
 
-
-        if (verker.companyId.roles.get(req.userId) != 'Owner') {
+        if (user.companyId.roles.get(req.userId) != 'Owner') {
             const error = new Error('NEED_OWNER_ACCOUNT')
             throw error;
         }
 
-        const newOutreach = OutreachModel({
-            companyId: verker.companyId._id,
+        const newOutreach = OutreachModel({            
+            projectId: outreachInput.projectId, 
+            projectTitle: project.title,
+            companyId: user.companyId._id,
+            verkerId: req.userId,
             consumerId: project.consumerId,
             company: {
-                name: verker.companyId.name,
-                logo: verker.companyId.logo,
-                established: verker.companyId.established,
-                verkerSince: verker.companyId.createdAt,
+                name: user.companyId.name,
+                logo: user.companyId.logo,
+                established: user.companyId.established,
+                verkerSince: user.companyId.createdAt,
             },
-            projectId: outreachInput.projectId,
-            projectTitle: project.title,
-            initialMessage: outreachInput.initialMessage,
-            totalMessages: 1,
-            members: [{
-                    userId: project.consumerId._id,
-                    role: "CONSUMER",
-                    firstName: project.consumerId.firstName,
-                    profileImage: project.consumerId.profileImage,
-                    totalUnread: 1,
-                },
-                {
-                    userId: req.userId,
-                    role: "VERKER",
-                    firstName: verker.firstName,
-                    profileImage: verker.profileImage,
-                    totalUnread: 0
-                }
-            ],
         });
 
         const savedOutreach = await newOutreach.save();
 
-
+        if (!savedOutreach) {
+            const error = new Error('UNABLE_TO_SAVE_OUTREACH');
+            throw error;
+        }
 
         const pushOutreachesToProject = {
             "$push": {
@@ -287,30 +287,33 @@ module.exports = {
         await project.updateOne(pushOutreachesToProject);
 
         await CompanyModel.findOneAndUpdate({
-            _id: verker.companyId._id
+            _id: user.companyId._id
         }, pushOutreachesToCompany)
 
-        if (!savedOutreach) {
-            const error = new Error('UNABLE_TO_SAVE_OUTREACH');
-            throw error;
-        }
+        console.log(savedOutreach._id);
 
-
-        const channel = client.channel('messaging', savedOutreach._id, { 
-            created_by_id: req.userId,  
-        }) 
-        await channel.create(); 
-        // create the channel and set created_by to user id 4645 
-        const update = await channel.update({ 
-            name: project.title, 
-            image: verker.profileImage, 
-            companyId: verker.companyId._id,
+        const channel = await serverClient.channel('messaging',savedOutreach._id.toString(), {
+            image: user.profileImage,
+            members: [project.consumerId._id.toString(), req.userId],
+            created_by_id: req.userId,
+            companyName: user.companyId.name,
+            verkerName: user.firstName,
+            projectTitle : project.title,
+            projectId : project._id,
+            outreachId : savedOutreach._id,
+            companyId: user.companyId._id,
+            consumerId: project.consumerId._id.toString(),
         }); 
+        await channel.create();
 
+
+        await channel.sendMessage({ 
+            user: {
+                id: req.userId,
+            },
+            text: outreachInput.initialMessage, 
+        });
 
         return savedOutreach;
-
-
-
     },
 }

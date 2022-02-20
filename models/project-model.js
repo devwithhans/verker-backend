@@ -11,6 +11,15 @@ const projectSchema = new Schema({
         type: String,
         required: true,
     },
+    status: {
+        type: String,
+        required: true,
+        default: 'OPEN' 
+    },
+    // OPEN => Project can still reseve outreaches
+    // ACTIVE => OFFER HAS BEN ACCEPTET
+    // FINISHED => PROJECT IS FINISHED
+    // CANCELED => PROJECT IS CANCELED
     description: {
         type: String,
         required: true,

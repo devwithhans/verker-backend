@@ -12,13 +12,14 @@ const outreachSchema = new Schema({
         type: String,
         required: true,
     },
-    initialMessage: {
-        type: String,
-        required: true,
-    },
     companyId: {
         type: Schema.Types.ObjectId,
         ref: "Companies",
+        required: true,
+    },
+    verkerId: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
         required: true,
     },
     consumerId: {
@@ -44,26 +45,6 @@ const outreachSchema = new Schema({
             required: true,
         },
     },
-    totalMessages: {
-        type: Number,
-        required: true
-    },
-    members: [{
-        userId: {
-            type: Schema.Types.ObjectId,
-            required: true
-        },
-        role: {type: String, required: true},
-        firstName: {
-            type: String,
-            required: true
-        },
-        profileImage: {
-            type: String,
-            required: true
-        },
-        totalUnread: {type: Number, required: true}
-    }]
 
 
 

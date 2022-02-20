@@ -10,12 +10,12 @@ const http = require('http');
 
 const errorHandler = require('./graphql/error-handler');
 
-const userGraphqlSchema = require('./graphql/userApi/user-schema');
-const userGraphqlResolver = require('./graphql/userApi/user-resolvers');
+// const userGraphqlSchema = require('./graphql/userApi/user-schema');
+// const userGraphqlResolver = require('./graphql/userApi/user-resolvers');
 const resolver = require('./graphql/api/resolver');
 const schema = require('./graphql/api/schema');
-const verkerGraphqlSchema = require('./graphql/verkerApi/verker-schema');
-const verkerGraphqlResolver = require('./graphql/verkerApi/verker-resolvers');
+// const verkerGraphqlSchema = require('./graphql/verkerApi/verker-schema');
+// const verkerGraphqlResolver = require('./graphql/verkerApi/verker-resolvers');
 
 const auth = require('./middleware/auth');
 const {router, getFileStream } = require('./routes/filemanagement-route');
@@ -47,7 +47,6 @@ app.post((res, req, next) => {
 
 app.use("/", auth);
 
-
 app.use("/file", router);
 
 app.get("/images/:key(*)", (req, res, next) => {
@@ -73,41 +72,6 @@ app.use('/graphql', graphqlHTTP({
             extensions: {
                 statusCode: err.statusCode,
                 customCode: err.customCode,
-            }
-        })
-    }
-}));
-
-
-app.use('/graphql/user', graphqlHTTP({
-    schema: userGraphqlSchema,
-    rootValue: userGraphqlResolver,
-    graphiql: true,
-    customFormatErrorFn: (err) => {
-        console.log(err);
-        const error = errorHandler(err.message)
-        return ({
-            message: error,
-            extensions: {
-                statusCode: err.statusCode,
-                customCode: err.customCode,
-            }
-        })
-    }
-}));
-
-app.use('/graphql/verker', graphqlHTTP({
-    schema: verkerGraphqlSchema,
-    rootValue: verkerGraphqlResolver,
-    graphiql: true,
-    customFormatErrorFn: (err) => {
-        console.log(err);
-        const error = errorHandler(err.message)
-        return ({
-            message: error.message ,
-            extensions: {
-                statusCode: error.statusCode,
-                customCode: error.customCode,
             }
         })
     }

@@ -35,6 +35,7 @@ module.exports = buildSchema(`
     type Project {
         _id: ID!
         title: String!
+        status: String!
         description: String!
         projectType: String!
         projectImages: [String!]!
@@ -97,30 +98,10 @@ module.exports = buildSchema(`
         _id: ID
         projectId: ID!
         projectTitle: String
-        initialMessage: String!
         company: Company!
         consumerId: ID!
-        totalMessages: Int!
-        messages: [Message]
-        members: [OutreachMember!]!
+        verkerId: ID!
         createdAt: String!
-    }
-
-    type Message {
-        outreachId: ID!
-        message: String!
-        senderId: ID!
-        createdAt: String!
-        senderName: String!
-
-    }
-
-    input MessageInput {
-        outreachId: ID!
-        socketNotification: [ID!]!
-        message: String!
-        senderName: String!
-
     }
 
 
@@ -132,11 +113,15 @@ module.exports = buildSchema(`
         totalUnread: Int!
     }
 
+    input OutreachInputData {
+        projectId: ID!
+        initialMessage: String!
+    }
+
 
 
     type RootQuery {
         isTyping( socketNotification: [ID!]!, name: String!, outreachId: ID!, isTyping: Boolean!): Boolean!
-        getMessages(outreachId: ID) : [Message!]
         getOutreaches(non: String) : [Outreach]!
         getProjects(non: String) : [Project!]!
         getUser(email: String!) : User!
@@ -144,7 +129,8 @@ module.exports = buildSchema(`
     }
 
     type RootMutation {
-        sendMessage(messageInput: MessageInput!): Message!
+        createOutreach(outreachInput: OutreachInputData!) : Outreach!
+
         createUser(userInput: UserInputData): User!
         createProject(projectInput: ProjectInputData): Project!
     }

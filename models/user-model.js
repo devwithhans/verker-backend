@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 
 
 const userSchema = new Schema({
-    firstName:  {
+    firstName:  { 
         type: String,
         required: true,
     },
@@ -37,8 +37,6 @@ const userSchema = new Schema({
      companyId: {
         type: Schema.Types.ObjectId,
         ref: "Company",
-        default: null
-
     },
     projects: [
         {

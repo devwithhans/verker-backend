@@ -26,7 +26,8 @@
     "multer-s3-transform": "^2.3.2",
     "request": "^2.81.0",
     "sharp": "^0.29.2",
-    "socket.io": "^4.4.0"
+    "socket.io": "^4.4.0",
+    "stream-chat": "^5.1.2"
   },
   "devDependencies": {
     "nodemon": "^2.0.13"
