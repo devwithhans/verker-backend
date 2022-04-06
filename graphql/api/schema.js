@@ -50,6 +50,7 @@ module.exports = buildSchema(`
 
     type User {
         _id: ID!
+        verker: Boolean!
         firstName: String!
         lastName: String!
         profileImage: String!
@@ -96,14 +97,19 @@ module.exports = buildSchema(`
 
     type Outreach {
         _id: ID
+        status: String!
         projectId: ID!
-        projectTitle: String
+        projectTitle: String!
         company: Company!
         consumerId: ID!
         verkerId: ID!
         createdAt: String!
     }
 
+    type VerkerProjects {
+        outreach: Outreach!
+        project: Project!
+    }
 
     type OutreachMember {
         userId: ID!
@@ -124,8 +130,10 @@ module.exports = buildSchema(`
         isTyping( socketNotification: [ID!]!, name: String!, outreachId: ID!, isTyping: Boolean!): Boolean!
         getOutreaches(non: String) : [Outreach]!
         getProjects(non: String) : [Project!]!
+        browseProjects(maxDistance: Int, type: String, coordinates: [Float!], skip: Int!, limit: Int!): [Project!]
         getUser(email: String!) : User!
         signinUser(email: String!, password: String!, verker: Boolean!) : AuthResult!
+        verkerGetProjects : [VerkerProjects!]
     }
 
     type RootMutation {

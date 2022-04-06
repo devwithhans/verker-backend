@@ -21,11 +21,15 @@ module.exports = function auth(req, res, next) {
    
 
     // Now we can validate the token by using the jwt function verify. This returns an decodedToken if the server reconises it
+    if(!token){
+        console.log('No FUCNKING TOKEN')
+        const error = new Error('NO_JWT');
+        return next(); 
+    }
+    
     try {
         decodedToken = jwt.verify(token, 'UmPBRH49FaxIHEVct6ybHpiTp5TQEOZPYgmWvOU7dselq2UPo7COKrM6zuJovqVbWcbAVHC1XSEvpNtTXa6koJcufn0aWBSrOFpNoAHP6ri7gVPcVjKeoNLeYy8');
     } catch (err) {
-        console.log('FUCKING SVIN2', token, err)
-
         const error = new Error('NO_JWT');
         return next();
     }
@@ -45,6 +49,7 @@ module.exports = function auth(req, res, next) {
     }
     if(decodedToken.role === "verker"){
         req.isVerker = true;
+        req.companyId = decodedToken.companyId;
     }
     if(decodedToken.role === "admin"){
         req.isAdmin = true;

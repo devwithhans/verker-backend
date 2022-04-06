@@ -11,10 +11,6 @@ exports.errorName = {
   ALREADT_OUTREACHED: 'ALREADT_OUTREACHED',
   NO_SOCKET_FOUND: 'NO_SOCKET_FOUND',
   NO_MESSAGES: 'NO_MESSAGES',
-
-
-
-
 }
 
 exports.errorType = {

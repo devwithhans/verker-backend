@@ -12,6 +12,16 @@ const outreachSchema = new Schema({
         type: String,
         required: true,
     },
+    status: {
+        type: String,
+        required: true,
+        default: 'PENDING' 
+    },
+    // PENDING
+    // ACTIVE
+    // LOST
+    // DONE
+    
     companyId: {
         type: Schema.Types.ObjectId,
         ref: "Companies",
@@ -45,11 +55,6 @@ const outreachSchema = new Schema({
             required: true,
         },
     },
-
-
-
-
-
 }, {
     timestamps: true
 });

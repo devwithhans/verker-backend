@@ -3,19 +3,19 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const fs = require('fs');
+const https = require('https');
+const http = require('http');
+const path = require('path')
+
 const {
     graphqlHTTP
 } = require('express-graphql');
-const http = require('http');
 
 const errorHandler = require('./graphql/error-handler');
 
-// const userGraphqlSchema = require('./graphql/userApi/user-schema');
-// const userGraphqlResolver = require('./graphql/userApi/user-resolvers');
 const resolver = require('./graphql/api/resolver');
 const schema = require('./graphql/api/schema');
-// const verkerGraphqlSchema = require('./graphql/verkerApi/verker-schema');
-// const verkerGraphqlResolver = require('./graphql/verkerApi/verker-resolvers');
 
 const auth = require('./middleware/auth');
 const {router, getFileStream } = require('./routes/filemanagement-route');
@@ -24,12 +24,14 @@ const mdbUser = process.env.MONGODB_USER_NAME;
 const mdbPw = process.env.MONGODB_PASSWORD;
 
 const app = express();
+const sslServer = https.createServer({
+    key: fs.readFileSync(path.join(__dirname, 'ssl', 'client-key.pem')),
+    cert: fs.readFileSync(path.join(__dirname, 'ssl', 'client-cert.pem')),
+}, app)
 const server = http.createServer(app);
-const {
-    Server
-} = require("socket.io");
+
 const { CostExplorer } = require('aws-sdk');
-const io = require("./socket").init(server);
+
 
 
 // const io = new Server(server);
@@ -51,13 +53,17 @@ app.use("/file", router);
 
 app.get("/images/:key(*)", (req, res, next) => {
 
+    
+
     const key = req.params.key;
 
     const readStream = getFileStream(key);
 
+
+
+
     readStream.pipe(res);
     console.log('WE GET THIS NOW')
-
 });
 
 app.use('/graphql', graphqlHTTP({
@@ -65,13 +71,14 @@ app.use('/graphql', graphqlHTTP({
     rootValue: resolver,
     graphiql: true,
     customFormatErrorFn: (err) => {
-        console.log(err);
         const error = errorHandler(err.message)
+        console.log(err);
         return ({
-            message: error,
+            message: error.message,
             extensions: {
-                statusCode: err.statusCode,
-                customCode: err.customCode,
+                errorName: err.message,
+                statusCode: error.statusCode,
+                customCode: error.customCode,
             }
         })
     }
@@ -80,41 +87,15 @@ app.use('/graphql', graphqlHTTP({
 
 app.use((err, req, res, next) => {
 
-    const status = error.statusCode || 500;
-    const message = error.message;
+    const status = err.statusCode || 500;
+    const message = err.message;
 
     res.status(999).json({
-        message: error.message,
-        statusCode: error.statusCode,
-        customCode: error.customCode,
+        message: err.message,
+        statusCode: err.statusCode,
+        customCode: err.customCode,
     });
 })
-
-
-io.on('connection', (socket) => {
-    console.log('user connected')
-
-    //Get the chatID of the user and join in a room of the same chatID
-    userID = socket.handshake.query.userID
-    socket.join(userID)
-
-    socket.on('disconnect', () => {
-        socket.leave(userID)
-    });
-
-    socket.on('send_message', message => {
-        receiverChatID = message.receiverChatID
-        senderChatID = message.senderChatID
-        content = message.content
-
-        //Send message to only that particular room
-        socket.in(receiverChatID).emit('receive_message', {
-            'content': content,
-            'senderChatID': senderChatID,
-            'receiverChatID':receiverChatID,
-        })
-    })
-});
 
 
 
@@ -123,7 +104,6 @@ io.on('connection', (socket) => {
 mongoose.connect(`mongodb+srv://${mdbUser}:${mdbPw}@verker.dewet.mongodb.net/verker?retryWrites=true&w=majority`).
 then(result => {
     server.listen(8080, () => {
-
         console.log('connected!!!!🔥')
     });
 
