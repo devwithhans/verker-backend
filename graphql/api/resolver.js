@@ -17,6 +17,7 @@ const UserModel = require('../../models/user-model');
 const ProjectModel = require('../../models/project-model');
 const OutreachModel = require('../../models/outreach-model')
 const CompanyModel = require('../../models/company-model');
+const OfferModel = require('../../models/offer-model');
 
 
 const {
@@ -299,7 +300,6 @@ module.exports = {
             _id: user.companyId._id
         }, pushOutreachesToCompany)
 
-        console.log(savedOutreach._id);
 
         const channel = await serverClient.channel('messaging',savedOutreach._id.toString(), {
             image: user.profileImage,
@@ -327,7 +327,54 @@ module.exports = {
     },
 
 
+    updateOffer: async function ({
+        offerInput
+    }, req) {
+        // if (!req.isVerker) {
+        //     const error = new Error(errorName.NOT_VERKER);
+        //     throw error;
+        // }
+        const obj = offerInput;
 
+        if(offerInput.offerId){
+            try {
+                const oldOffer = await OfferModel.findById(offerInput.offerId);
+                await oldOffer.updateOne({status: "oldOffer"})
+                if(oldOffer){
+                    const update = await serverClient.partialUpdateMessage(offerInput.offerId, {
+                        set: {
+                            "offer.status":  "oldOffer"
+                        }
+                    }, offerInput.verkerId);
+                }
+               } catch (error) {
+                   console.log(error);
+                   throw Error(errorName.NO_SOCKET_FOUND)
+               }
+        } 
+
+        const newOffer = OfferModel(obj);
+        const savedOffer = await newOffer.save();
+        
+        console.log(offerInput.outreachId)
+
+        const channel = await serverClient.getChannelById('messaging', offerInput.outreachId);
+
+        await channel.sendMessage({ 
+            id: savedOffer._id,
+            user: {
+                id: offerInput.verkerId.toString() ,
+            },
+            text: "Det virker vist", 
+            offer: {...obj, offerSent: Date.now()},
+        });
+
+
+
+        return "fine";
+
+
+    },
 
 
     browseProjects: async function ({
@@ -341,7 +388,6 @@ module.exports = {
                 const error = new Error(errorName.NOT_VERKER);
                 throw error;
             }
-            console.log(limit, skip, coordinates, maxDistance, type);
 
             const company = await CompanyModel.findById(req.companyId);
 
@@ -393,7 +439,6 @@ module.exports = {
 
         },
     verkerGetProjects: async function ({}, req){
-        console.log(req.isVerker);
         if (!req.isVerker) {
             const error = new Error(errorName.NOT_VERKER);
             throw error;
@@ -410,11 +455,8 @@ module.exports = {
                 outreach: outreaches[i],
             })
         }
-        console.log(result);
 
         return result;
-
-
     }
 }
 

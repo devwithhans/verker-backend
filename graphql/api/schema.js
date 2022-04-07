@@ -1,3 +1,5 @@
+
+
 const { buildSchema } = require('graphql');
 
 module.exports = buildSchema(`
@@ -80,6 +82,34 @@ module.exports = buildSchema(`
         password: String!
     }
 
+    input OfferInputData {
+        status: String!
+        offerId: ID
+        projectId: ID!
+        outreachId: ID!
+        verkerId: ID!
+        consumerId: ID!
+        consumerName: String!
+        consumerAddress: InputAddress!
+        companyId: ID!
+        companyName: String!
+        cvr: Int!
+        companyAddress: InputAddress!
+        companyEmail: String!
+        description: String
+        materials: [MaterialInputData]
+        hours: Float
+        hourlyRate: Float
+        startDate: String
+        offerExpires: String
+    }
+
+    input MaterialInputData {
+        name: String!
+        price: Float!
+        quantity: Float!
+    }
+
     type Company {
         _id: ID!
         name: String!
@@ -138,9 +168,9 @@ module.exports = buildSchema(`
 
     type RootMutation {
         createOutreach(outreachInput: OutreachInputData!) : Outreach!
-
-        createUser(userInput: UserInputData): User!
+        createUser(userInput: UserInputData!): User!
         createProject(projectInput: ProjectInputData): Project!
+        updateOffer(offerInput: OfferInputData) : String!
     }
     
 
