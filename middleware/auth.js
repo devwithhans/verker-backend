@@ -46,16 +46,18 @@ module.exports = function auth(req, res, next) {
 
     if (decodedToken.role === "user") {
         req.isUser = true;
+        req.userId = decodedToken.userId;
     }
     if(decodedToken.role === "verker"){
         req.isVerker = true;
         req.companyId = decodedToken.companyId;
+        req.userId = decodedToken.userId;
+
     }
     if(decodedToken.role === "admin"){
         req.isAdmin = true;
     }
 
-    console.log(decodedToken.userId, req.isVerker);
 
     // If the token is valid, are storing the userId in the request, and parsing on to the next middleware
     req.userId = decodedToken.userId;

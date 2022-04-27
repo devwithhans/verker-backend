@@ -9,7 +9,7 @@ const companySchema = new Schema({
     },
     description: {
         type: String,
-        required: true,
+
     },
     cvr: {
         type: String,
@@ -21,14 +21,15 @@ const companySchema = new Schema({
     },
     logo: {
         type: String,
-        required: true,
+
     },
     phone: {
         type: String,
         required: true,
     },
-    roles: {
-        type: Map,
+    owner: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
         required: true,
     },
     employees: {
@@ -37,6 +38,10 @@ const companySchema = new Schema({
     },
     established: {
         type: Number,
+        required: true,
+    },
+    type: {
+        type: String,
         required: true,
     },
     address: {
@@ -48,16 +53,6 @@ const companySchema = new Schema({
             type: String,
             required: true
         }
-    },
-    location: {
-        type: {
-            type: String,
-            required: true
-        },
-        coordinates: {
-            type: Array,
-            required: true
-        },
     },
     outreaches: [{
             outreachId: {

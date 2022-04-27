@@ -10,8 +10,8 @@ module.exports = buildSchema(`
     }
 
     type Address {
-        address: String!
-        zip: String!
+        address: String
+        zip: String
     }
 
     input InputLocation {
@@ -52,12 +52,12 @@ module.exports = buildSchema(`
 
     type User {
         _id: ID!
-        verker: Boolean!
+        companyId: String
         firstName: String!
         lastName: String!
-        profileImage: String!
-        deviceToken: String!
-        address: Address!
+        profileImage: String
+        deviceToken: String
+        address: Address
         projects: [Project]
         streamToken: ID!
         email: String!
@@ -75,11 +75,12 @@ module.exports = buildSchema(`
         firstName: String!
         lastName: String!
         profileImage: String
-        deviceToken: String!
-        address: InputAddress!
+        deviceToken: String
+        address: InputAddress
         phone: String!
         email: String!
         password: String!
+        platform: String!
     }
 
     input OfferInputData {
@@ -104,7 +105,36 @@ module.exports = buildSchema(`
         offerExpires: String
     }
 
+    type Offer {
+        _id: ID!
+        status: String!
+        projectId: ID!
+        outreachId: ID!
+        verkerId: ID!
+        consumerId: ID!
+        consumerName: String!
+        consumerAddress: Address!
+        companyId: ID!
+        companyName: String!
+        cvr: Int!
+        companyAddress: Address!
+        companyEmail: String!
+        description: String
+        materials: [Material]
+        hours: Float
+        hourlyRate: Float
+        startDate: String
+        offerExpires: String
+    }
+
     input MaterialInputData {
+        name: String!
+        price: Float!
+        quantity: Float!
+    }
+
+
+    type Material {
         name: String!
         price: Float!
         quantity: Float!
@@ -119,10 +149,23 @@ module.exports = buildSchema(`
         phone: String!
         employees: Int!
         logo: String!
+        type: String!
         established: String!
         address: Address!
-        location: Location!
         createdAt: String!
+    }
+
+    input CompanyInputData {
+        type: String!
+        name: String!
+        description: String!
+        cvr: String!
+        email: String!
+        phone: String!
+        employees: Int!
+        logo: String!
+        established: String!
+        address: InputAddress!
     }
 
     type Outreach {
@@ -155,8 +198,9 @@ module.exports = buildSchema(`
     }
 
 
-
     type RootQuery {
+        refreshJWT : AuthResult!
+        getOffer(offerId: ID!) : Offer!
         isTyping( socketNotification: [ID!]!, name: String!, outreachId: ID!, isTyping: Boolean!): Boolean!
         getOutreaches(non: String) : [Outreach]!
         getProjects(non: String) : [Project!]!
@@ -169,6 +213,7 @@ module.exports = buildSchema(`
     type RootMutation {
         createOutreach(outreachInput: OutreachInputData!) : Outreach!
         createUser(userInput: UserInputData!): User!
+        createCompany(companyInput: CompanyInputData!): Company!
         createProject(projectInput: ProjectInputData): Project!
         updateOffer(offerInput: OfferInputData) : String!
     }

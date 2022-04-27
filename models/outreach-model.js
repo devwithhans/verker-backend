@@ -17,6 +17,10 @@ const outreachSchema = new Schema({
         required: true,
         default: 'PENDING' 
     },
+    offer: [{
+        type: Schema.Types.ObjectId,
+        ref: "Offer",
+    }],
     // PENDING
     // ACTIVE
     // LOST
@@ -44,7 +48,6 @@ const outreachSchema = new Schema({
         },
         logo: {
             type: String,
-            required: true,
         },
         established: {
             type: Number,

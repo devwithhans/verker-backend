@@ -25,14 +25,18 @@ const userSchema = new Schema({
     },
     profileImage: {
         type: String,
-        required: true,
+        // required: true,
     },
     deviceToken: {
         type: String,
     },
+    platform: {
+        type: String,
+        required: true,
+    },
     address: {
-        address: {type: String, required: true},
-        zip: {type: String, required: true}
+        address: {type: String, required: false},
+        zip: {type: String, required: false}
     },
      companyId: {
         type: Schema.Types.ObjectId,
