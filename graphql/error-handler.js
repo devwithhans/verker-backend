@@ -1,6 +1,7 @@
-const { errorType } = require('./constants')
+const { errorType } = require('./constants');
 
-module.exports = getErrorCode = errorName => {
-  return errorType[errorName]
-}
-
+module.exports = {
+  errorHandler(errorName) {
+    return errorType[errorName];
+  },
+};

@@ -3,110 +3,91 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const fs = require('fs');
-const https = require('https');
+// const fs = require('fs');
+// const https = require('https');
 const http = require('http');
-const path = require('path')
+// const path = require('path');
 
 const {
-    graphqlHTTP
+  graphqlHTTP,
 } = require('express-graphql');
 
-const errorHandler = require('./graphql/error-handler');
+const { errorHandler } = require('./graphql/error-handler');
 
 const resolver = require('./graphql/api/resolver');
 const schema = require('./graphql/api/schema');
 
 const auth = require('./middleware/auth');
-const {router, getFileStream } = require('./routes/filemanagement-route');
+const { router, getFileStream } = require('./routes/filemanagement-route');
 
 const mdbUser = process.env.MONGODB_USER_NAME;
 const mdbPw = process.env.MONGODB_PASSWORD;
 
 const app = express();
-const sslServer = https.createServer({
-    key: fs.readFileSync(path.join(__dirname, 'ssl', 'client-key.pem')),
-    cert: fs.readFileSync(path.join(__dirname, 'ssl', 'client-cert.pem')),
-}, app)
+// const sslServer = https.createServer({
+//   key: fs.readFileSync(path.join(__dirname, 'ssl', 'client-key.pem')),
+//   cert: fs.readFileSync(path.join(__dirname, 'ssl', 'client-cert.pem')),
+// }, app);
 const server = http.createServer(app);
 
-const { CostExplorer } = require('aws-sdk');
-
-
-
 // const io = new Server(server);
-
 
 // Here we define that the request body is an json object
 app.use(bodyParser.json());
 
 // Here we set a default header for all posts
 app.post((res, req, next) => {
-    res.setHeader('Content-Type', 'application/json', 'Authorization');
-    next();
+  res.setHeader('Content-Type', 'application/json', 'Authorization');
+  next();
 });
 
+app.use('/', auth);
 
-app.use("/", auth);
+app.use('/file', router);
 
-app.use("/file", router);
+app.get('/images/:key(*)', (req, res) => {
+  const { key } = req.params;
 
-app.get("/images/:key(*)", (req, res, next) => {
+  const readStream = getFileStream(key);
 
-    
-
-    const key = req.params.key;
-
-    const readStream = getFileStream(key);
-
-
-
-
-    readStream.pipe(res);
-    console.log('WE GET THIS NOW')
+  readStream.pipe(res);
 });
 
 app.use('/graphql', graphqlHTTP({
-    schema: schema,
-    rootValue: resolver,
-    graphiql: true,
-    customFormatErrorFn: (err) => {
-        const error = errorHandler(err.message)
-        console.log(err);
-        return ({
-            message: error.message,
-            extensions: {
-                errorName: err.message,
-                statusCode: error.statusCode,
-                customCode: error.customCode,
-            }
-        })
-    }
+  schema,
+  rootValue: resolver,
+  graphiql: true,
+  customFormatErrorFn: (err) => {
+    const error = errorHandler(err.message);
+    console.log(err);
+    return ({
+      message: error.message,
+      extensions: {
+        errorName: err.message,
+        statusCode: error.statusCode,
+        customCode: error.customCode,
+      },
+    });
+  },
 }));
 
+app.use((err, req, res) => {
+//   const status = err.statusCode || 500;
+//   const { message } = err;
 
-app.use((err, req, res, next) => {
-
-    const status = err.statusCode || 500;
-    const message = err.message;
-
-    res.status(999).json({
-        message: err.message,
-        statusCode: err.statusCode,
-        customCode: err.customCode,
-    });
-})
-
-
-
+  res.status(999).json({
+    message: err.message,
+    statusCode: err.statusCode,
+    customCode: err.customCode,
+  });
+});
 
 // Connecing to database and serving:
-mongoose.connect(`mongodb+srv://${mdbUser}:${mdbPw}@verker.dewet.mongodb.net/verker?retryWrites=true&w=majority`).
-then(result => {
+mongoose.connect(`mongodb+srv://${mdbUser}:${mdbPw}@verker.dewet.mongodb.net/verker?retryWrites=true&w=majority`)
+  . then(() => {
     server.listen(8080, () => {
-        console.log('connected!!!!🔥')
+      console.log('connected!!!!🔥');
     });
-
-}).catch(err => {
+  }).catch((err) => {
     console.log(err);
-});
+  });
