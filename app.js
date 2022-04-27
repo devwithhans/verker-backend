@@ -14,7 +14,7 @@ const {
 
 const { errorHandler } = require('./graphql/error-handler');
 
-const resolver = require('./graphql/api/resolver');
+const resolver = require('./graphql/api/index');
 const schema = require('./graphql/api/schema');
 
 const auth = require('./middleware/auth');

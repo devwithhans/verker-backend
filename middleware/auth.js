@@ -34,21 +34,19 @@ module.exports = function auth(req, res, next) {
 
   // Now we checks if the decodedToken is defined, and therefore valid
   if (!decodedToken) {
-    console.log('FUCKING SVIN3');
-
+    console.log('FUCKING SVIN1');
     // const error = new Error('NO_JWT');
     return next();
   }
 
   if (decodedToken.role === 'user') {
-    console.log('FUCKING SVIN3');
+    console.log('FUCKING SVIN2');
 
     req.isUser = true;
     req.userId = decodedToken.userId;
   }
   if (decodedToken.role === 'verker') {
     console.log('FUCKING SVIN3');
-
     req.isVerker = true;
     req.companyId = decodedToken.companyId;
     req.userId = decodedToken.userId;
