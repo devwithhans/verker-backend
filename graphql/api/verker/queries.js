@@ -63,12 +63,16 @@ module.exports = {
     }
 
     const company = await CompanyModel.findById(req.companyId);
-    console.log(req.companyId);
     if (!company) throw new Error(errorName.NOT_VERKER);
 
-    // const outreachIds = company.outreaches.map((item) => item.projectId);
+    const outreachIds = company.outreaches.map((item) => item.projectId);
 
     const query = {
+
+      projectType: type,
+      _id: {
+        $nin: outreachIds,
+      },
       location: {
         $near: {
           $geometry: {
@@ -78,13 +82,9 @@ module.exports = {
           $maxDistance: maxDistance,
         },
       },
-      projectType: type,
-      // _id: {
-      //   $nin: outreachIds,
+      // outreaches: {
+      //   $ne: req.companyId,
       // },
-      outreaches: {
-        $ne: req.companyId,
-      },
     };
 
     // We find the projects for the current user

@@ -95,12 +95,12 @@ module.exports = {
 
     const user = await UserModel.findById(req.userId).populate('companyId');
 
-    // for (var i in user.companyId.outreaches) {
-    //     if (user.companyId.outreaches[i].projectId.toString() == project._id.toString()) {
-    //         const error = new Error('ALREADT_OUTREACHED')
-    //         throw error;
-    //     }
-    // }
+    user.companyId.outreaches.forEach((e) => {
+      if (e.projectId.toString() === project._id.toString()) {
+        const error = new Error('ALREADT_OUTREACHED');
+        throw error;
+      }
+    });
 
     // if (user.companyId.roles.get(req.userId) !== 'Owner') {
     //   const error = new Error('NEED_OWNER_ACCOUNT');
