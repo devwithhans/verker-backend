@@ -1,11 +1,12 @@
 /* eslint no-underscore-dangle: ["error", { "allow": ["_id", "_doc"] }] */
 require('dotenv').config();
-const { connect } = require('getstream');
+const { StreamChat } = require('stream-chat');
 const bcrypt = require('bcryptjs');
 
-const ApiKey = 'cm6ynpu8m6f9';
+// server_client = stream_chat.StreamChat(api_key="STREAM_KEY", api_secret="STREAM_SECRET")
+const apiKey = 'cm6ynpu8m6f9';
 const apiSecret = 'twqjvajkmwvdd24epsd9f2z2zgtwb7zhc2mg7cxa9ab4kkn72tpeun3bewvzj42h';
-const serverClient = connect(ApiKey, apiSecret);
+const serverClient = StreamChat.getInstance(apiKey, apiSecret);
 const UserModel = require('../../../models/user-model');
 const ProjectModel = require('../../../models/project-model');
 const OutreachModel = require('../../../models/outreach-model');
@@ -16,6 +17,8 @@ module.exports = {
   async createUser({
     userInput,
   }) {
+    console.log('createUser');
+
     const existingUser = await UserModel.findOne({
       email: userInput.email.toLowerCase(),
     });
@@ -44,47 +47,11 @@ module.exports = {
       id: result._id.toString(),
     };
   },
-  // async updateOffer({
-  //   offerInput,
-  // }) {
-  //   // if (!req.isVerker) {
-  //   //     const error = new Error(errorName.NOT_VERKER);
-  //   //     throw error;
-  //   // }
-  //   if (offerInput.offerId) {
-  //     try {
-  //       const oldOffer = await OfferMode
-  // l.findByIdAndUpdate(offerInput.offerId, { status: 'oldOffer' });
-  //       if (oldOffer) {
-  //         await serverClient.updateMessage({
-  //           id: offerInput.offerId, message: '', offer:
-  // oldOffer._id.toString(), userid: offerInput.verkerId,
-  //         });
-  //       }
-  //     } catch (error) {
-  //       throw Error(errorName.NO_SOCKET_FOUND);
-  //     }
-  //   }
-
-  //   const newOffer = OfferModel(offerInput);
-  //   const savedOffer = await newOffer.save();
-
-  //   const channel = await serverClient.getChannelById('messaging', offerInput.outreachId);
-
-  //   await channel.sendMessage({
-  //     id: savedOffer._id.toString(),
-  //     user: {
-  //       id: offerInput.verkerId,
-  //     },
-  //     text: 'Det virker vist',
-  //     offerId: savedOffer._id.toString(),
-  //   });
-  //   return 'fine';
-  // },
   async createCompany({
     companyInput,
   }, req) {
-    console.log(req.isUser);
+    console.log('createCompany');
+
     if (!req.isUser) {
       const error = new Error(errorName.NOT_VERKER);
       throw error;
@@ -138,7 +105,7 @@ module.exports = {
     const newOutreach = OutreachModel({
       projectId: outreachInput.projectId,
       projectTitle: project.title,
-      companyId: user.companyId._id,
+      companyId: req.companyId,
       verkerId: req.userId,
       consumerId: project.consumerId,
       company: {
@@ -172,9 +139,11 @@ module.exports = {
     };
 
     await project.updateOne(pushOutreachesToProject);
+    console.log(user.companyId._id);
+    console.log(req.companyId);
 
     await CompanyModel.findOneAndUpdate({
-      id: user.companyId._id,
+      id: req.companyId,
     }, pushOutreachesToCompany);
 
     const channel = await serverClient.channel('messaging', savedOutreach._id.toString(), {

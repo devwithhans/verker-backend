@@ -6,10 +6,10 @@ const jwt = require('jsonwebtoken');
 
 const { connect } = require('getstream');
 
-const ApiKey = 'cm6ynpu8m6f9';
+const apiKey = 'cm6ynpu8m6f9';
 const apiSecret = 'twqjvajkmwvdd24epsd9f2z2zgtwb7zhc2mg7cxa9ab4kkn72tpeun3bewvzj42h';
 
-const serverClient = connect(ApiKey, apiSecret);
+const serverClient = connect(apiKey, apiSecret);
 
 const UserModel = require('../../../models/user-model');
 const ProjectModel = require('../../../models/project-model');
@@ -24,7 +24,10 @@ const {
 const jwtHt = process.env.JWT_TOKEN;
 
 module.exports = {
+
   async getUser(res, req) {
+    console.log('getUser');
+
     if (!req.isUser && !req.isVerker) {
       const error = new Error(errorName.NOT_VERKER);
       throw error;
@@ -45,6 +48,8 @@ module.exports = {
     };
   },
   async refreshJWT(res, req) {
+    console.log('refreshJWT');
+
     if (!req.userId) {
       const error = new Error(errorName.NOT_VERKER);
       throw error;
@@ -68,7 +73,7 @@ module.exports = {
     }, jwtHt, {
       // expiresIn: '1h'
     });
-    const userToken = serverClient.createToken(user._id.toString());
+    const userToken = serverClient.createUserToken(user._id.toString());
 
     return {
       jwt: jsonWebToken,
@@ -83,6 +88,8 @@ module.exports = {
     password,
     verker,
   }) {
+    console.log('signinUser');
+
     const user = await UserModel.findOne({
       email, // Checking if the email exists in the database
     });
@@ -117,7 +124,7 @@ module.exports = {
       // expiresIn: '1h'
     });
 
-    const userToken = serverClient.createToken(user._id.toString());
+    const userToken = serverClient.createUserToken(user._id.toString());
 
     // const response = await serverClient.upsertUsers([{
     //   id: user._id.toString(),
@@ -139,6 +146,8 @@ module.exports = {
     };
   },
   async getProjects(res, req) {
+    console.log('getProjects');
+
     if (!req.isUser && !req.isVerker) {
       const error = new Error(errorName.NOT_VERKER);
       throw error;
@@ -155,6 +164,8 @@ module.exports = {
     return project;
   },
   async getOutreaches(res, req) {
+    console.log('getOutreaches');
+
     if (!req.isUser) {
       const error = new Error(errorName.NOT_VERKER);
       throw error;

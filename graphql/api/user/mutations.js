@@ -15,6 +15,7 @@ module.exports = {
   async createUser({
     userInput,
   }) {
+    console.log('createUser');
     const existingUser = await UserModel.findOne({
       email: userInput.email.toLowerCase(),
     });
@@ -46,6 +47,8 @@ module.exports = {
   async createProject({
     projectInput,
   }, req) {
+    console.log('createProject');
+
     if (!req.isUser) {
       const error = new Error('Not authorized');
       error.statusCode = 404;

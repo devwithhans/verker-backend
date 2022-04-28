@@ -3,7 +3,6 @@ require('dotenv').config();
 
 const ProjectModel = require('../../../models/project-model');
 const OutreachModel = require('../../../models/outreach-model');
-// const MessageModel = require('../../../models/message-model');
 const CompanyModel = require('../../../models/company-model');
 
 const {
@@ -27,6 +26,8 @@ function getDistanceFromLatLonInKm(lon1, lat1, lon2, lat2) {
 
 module.exports = {
   async verkerGetProjects(res, req) {
+    console.log('verkerGetProjects');
+
     if (!req.isVerker) {
       const error = new Error(errorName.NOT_VERKER);
       throw error;
@@ -46,15 +47,7 @@ module.exports = {
     });
     return result;
   },
-  // async getOffer({
-  //   offerId,
-  // }) {
-  //   const offer = await OfferModel.findById(offerId);
-  //   if (!offer) {
-  //     throw Error(errorName.NO_SOCKET_FOUND);
-  //   }
-  //   return offer;
-  // },
+
   async browseProjects({
     limit,
     skip,
@@ -62,16 +55,18 @@ module.exports = {
     maxDistance,
     type,
   }, req) {
+    console.log('browseProjects');
+
     if (!req.isVerker) {
       const error = new Error(errorName.NOT_VERKER);
       throw error;
     }
 
     const company = await CompanyModel.findById(req.companyId);
-
+    console.log(req.companyId);
     if (!company) throw new Error(errorName.NOT_VERKER);
 
-    const outreachIds = company.outreaches.map((item) => item.projectId);
+    // const outreachIds = company.outreaches.map((item) => item.projectId);
 
     const query = {
       location: {
@@ -84,10 +79,12 @@ module.exports = {
         },
       },
       projectType: type,
-      id: {
-        $nin: outreachIds,
+      // _id: {
+      //   $nin: outreachIds,
+      // },
+      outreaches: {
+        $ne: req.companyId,
       },
-
     };
 
     // We find the projects for the current user
