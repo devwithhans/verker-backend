@@ -95,22 +95,27 @@ module.exports = {
 
     const user = await UserModel.findById(req.userId).populate('companyId');
 
-    user.companyId.outreaches.forEach((e) => {
-      if (e.projectId.toString() === project._id.toString()) {
-        const error = new Error(errorName.ALREADT_OUTREACHED);
-        throw error;
-      }
-    });
+    // for (var i in user.companyId.outreaches) {
+    //     if (user.companyId.outreaches[i].projectId.toString() == project._id.toString()) {
+    //         const error = new Error('ALREADT_OUTREACHED')
+    //         throw error;
+    //     }
+    // }
+
+    // if (user.companyId.roles.get(req.userId) !== 'Owner') {
+    //   const error = new Error('NEED_OWNER_ACCOUNT');
+    //   throw error;
+    // }
 
     const newOutreach = OutreachModel({
       projectId: outreachInput.projectId,
       projectTitle: project.title,
-      companyId: req.companyId,
+      companyId: user.companyId._id,
       verkerId: req.userId,
       consumerId: project.consumerId,
       company: {
         name: user.companyId.name,
-        logo: user.companyId.logo ?? '',
+        logo: user.companyId.logo,
         established: user.companyId.established,
         verkerSince: user.companyId.createdAt,
       },
@@ -139,12 +144,12 @@ module.exports = {
     };
 
     await project.updateOne(pushOutreachesToProject);
-    console.log(user.companyId._id);
-    console.log(req.companyId);
 
     await CompanyModel.findOneAndUpdate({
-      id: req.companyId,
+      _id: user.companyId._id,
     }, pushOutreachesToCompany);
+
+    console.log(savedOutreach._id);
 
     const channel = await serverClient.channel('messaging', savedOutreach._id.toString(), {
       image: user.profileImage,
