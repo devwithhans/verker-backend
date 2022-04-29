@@ -6,15 +6,14 @@ const jwt = require('jsonwebtoken');
 
 const { connect } = require('getstream');
 
-const apiKey = 'cm6ynpu8m6f9';
-const apiSecret = 'twqjvajkmwvdd24epsd9f2z2zgtwb7zhc2mg7cxa9ab4kkn72tpeun3bewvzj42h';
+const apiKey = process.env.STREAM_API_KEY;
+const apiSecret = process.env.STREAM_API_SECRET;
 
 const serverClient = connect(apiKey, apiSecret);
 
 const UserModel = require('../../../models/user-model');
 const ProjectModel = require('../../../models/project-model');
 const OutreachModel = require('../../../models/outreach-model');
-// const MessageModel = require('../../../models/message-model');
 const CompanyModel = require('../../../models/company-model');
 
 const {
