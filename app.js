@@ -28,7 +28,6 @@ const sslServer = https.createServer({
   key: fs.readFileSync(path.join(__dirname, 'ssl', 'client-key.pem')),
   cert: fs.readFileSync(path.join(__dirname, 'ssl', 'client-cert.pem')),
 }, app);
-// const server = http.createServer(app);
 
 // Here we define that the request body is an json object
 app.use(bodyParser.json());
@@ -68,17 +67,6 @@ app.use('/graphql', graphqlHTTP({
     });
   },
 }));
-
-// app.use((err, req, res) => {
-// //   const status = err.statusCode || 500;
-// //   const { message } = err;
-
-//   res.status(999).json({
-//     message: err.message,
-//     statusCode: err.statusCode,
-//     customCode: err.customCode,
-//   });
-// });
 
 // Connecing to database and serving:
 mongoose.connect(`mongodb+srv://${mdbUser}:${mdbPw}@verker.dewet.mongodb.net/verker?retryWrites=true&w=majority`)
