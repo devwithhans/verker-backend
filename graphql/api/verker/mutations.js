@@ -3,9 +3,8 @@ require('dotenv').config();
 const { StreamChat } = require('stream-chat');
 const bcrypt = require('bcryptjs');
 
-// server_client = stream_chat.StreamChat(api_key="STREAM_KEY", api_secret="STREAM_SECRET")
-const apiKey = 'cm6ynpu8m6f9';
-const apiSecret = 'twqjvajkmwvdd24epsd9f2z2zgtwb7zhc2mg7cxa9ab4kkn72tpeun3bewvzj42h';
+const apiKey = process.env.STREAM_API_KEY;
+const apiSecret = process.env.STREAM_API_SECRET;
 const serverClient = StreamChat.getInstance(apiKey, apiSecret);
 const UserModel = require('../../../models/user-model');
 const ProjectModel = require('../../../models/project-model');
